@@ -8,6 +8,9 @@ WORKDIR /app
 
 # nginx default
 COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
+COPY docker/unicorn.rb /app/config/unicorn.rb
+COPY docker/database.yml /app/config/database.yml
+
 
 COPY . .
 

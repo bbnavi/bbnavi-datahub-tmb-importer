@@ -2,7 +2,7 @@
 
 set -e
 
-DB=${DB_HOST:-db:5432}
+DB=${DB_HOST:-datahub-tmb-database-postgres:5432}
 
 dockerize -wait tcp://$DB -timeout 30s
 

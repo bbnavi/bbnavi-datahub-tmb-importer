@@ -164,6 +164,8 @@ class PoiRecord < Record
     # @return [String] Name of category found in xml
     def find_category_by_id(cat_id)
       @xml_doc.xpath("/result/classification[@id='#{cat_id}']").first.attributes["name"].try(:value)
+    rescue
+      ""
     end
 
     def parse_addresses(xml_part)

@@ -33,17 +33,17 @@ every 1.day, at: "02:05 am" do
   runner "Importer.send_data(:poi)"
 end
 
+# Es werden bei BBNavi erst einmal keine Events benötigt
+# every 1.day, at: "00:30 am" do
+#   runner "Importer.load_data(:event)"
+# end
 
-every 1.day, at: "00:30 am" do
-  runner "Importer.load_data(:event)"
-end
+# every 1.day, at: "01:30 am" do
+#   runner "Importer.parse_data(:event)"
+# end
 
-every 1.day, at: "01:30 am" do
-  runner "Importer.parse_data(:event)"
-end
-
-every 1.day, at: "02:30 am" do
-  runner "Importer.send_data(:event)"
-end
+# every 1.day, at: "02:30 am" do
+#   runner "Importer.send_data(:event)"
+# end
 
 # Learn more: http://github.com/javan/whenever

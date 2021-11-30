@@ -25,10 +25,13 @@ class Record < ApplicationRecord
   def select_target_servers(location, potential_target_servers)
     p "#{location[:district]}, #{location[:department]}"
 
-    selected_servers = potential_target_servers.select { |_server_name, options|
-      options[:districts].include?(location[:district].to_s.strip) ||
-        options[:departments].include?(location[:department].to_s.strip)
-    }
+    # Bei BBNavi werden alle Standorte importiert
+    # selected_servers = potential_target_servers.select { |_server_name, options|
+    #   options[:districts].include?(location[:district].to_s.strip) ||
+    #     options[:departments].include?(location[:department].to_s.strip)
+    # }
+    selected_servers = potential_target_servers
+
     selected_servers.try(:keys)
   end
 

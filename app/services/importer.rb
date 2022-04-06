@@ -20,14 +20,16 @@ class Importer
       CommunityRecord.where(data_type: record_type.to_s).group_by(&:title).each do |target_server_name, records|
         p "Server: #{target_server_name}, #{records.count} entries"
         records.each do |record|
-          data_to_send = record.json_data
-          options = all_options[target_server_name.to_sym]
+          begin
+            data_to_send = record.json_data
+            options = all_options[target_server_name.to_sym]
 
-          send_json_to_server(target_server_name, options, data_to_send)
-          sleep 2
+            send_json_to_server(target_server_name, options, data_to_send)
+            sleep 2.5
+          rescue => e
+            p "Error: #{e.message}"
+          end
         end
-        p "Waiting 120 seconds..."
-        sleep 120
       end
     end
 

@@ -1,7 +1,22 @@
 class Importer
   attr_accessor :access_token, :record_type
   class << self
+
+    # load data and send it to all servers
+    def perform(record_type)
+      Importer.load_data(record_type)
+      Importer.parse_data(record_type)
+      Importer.send_data(record_type)
+    end
+
+    # load data without sending it to all servers
+    def update_data(record_type)
+      Importer.load_data(record_type)
+      Importer.parse_data(record_type)
+    end
+
     def load_data(record_type)
+      p "Start loading #{record_type}"
       record = record_model(record_type)
       record.destroy_all
 
@@ -9,26 +24,30 @@ class Importer
     end
 
     def parse_data(record_type)
-      CommunityRecord.where(data_type: record_type.to_s).destroy_all
+      p "Start parsing #{record_type}"
+      CommunityRecord.where(data_type: record_type.to_s).delete_all
+      p "...cleaned up old #{record_type} data"
 
       record = record_model(record_type)
       record.last.parse_data
     end
 
     def send_data(record_type)
-      all_options = Rails.application.credentials.target_servers
-      CommunityRecord.where(data_type: record_type.to_s).group_by(&:title).each do |target_server_name, records|
-        p "Server: #{target_server_name}, #{records.count} entries"
-        records.each do |record|
-          begin
-            data_to_send = record.json_data
-            options = all_options[target_server_name.to_sym]
+      CommunityRecord.where.not(title: "unused").pluck(:title).uniq.each do |target_server_name|
+        p "Sending Server: #{target_server_name}"
+        Importer.delay.send_data_to_community(record_type, target_server_name)
+      end
+    end
 
-            send_json_to_server(target_server_name, options, data_to_send)
-            sleep 2.5
-          rescue => e
-            p "Error: #{e.message}"
-          end
+    def send_data_to_community(record_type, community_name)
+      options = Rails.application.credentials.target_servers[community_name.to_sym]
+      CommunityRecord.where.not(title: "unused").where(data_type: record_type.to_s, title: community_name).each do |record|
+        begin
+          data_to_send = record.json_data
+          send_json_to_server(community_name, options, data_to_send)
+          sleep 0.2
+        rescue => e
+          p "Error: #{e.message} - Server #{community_name} - ID #{record.id}"
         end
       end
     end

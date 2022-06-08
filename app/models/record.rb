@@ -23,16 +23,17 @@ class Record < ApplicationRecord
   end
 
   def select_target_servers(location, potential_target_servers)
-    p "#{location[:district]}, #{location[:department]}"
-
     # Bei BBNavi werden alle Standorte importiert
-    # selected_servers = potential_target_servers.select { |_server_name, options|
-    #   options[:districts].include?(location[:district].to_s.strip) ||
-    #     options[:departments].include?(location[:department].to_s.strip)
-    # }
     selected_servers = potential_target_servers
 
     selected_servers.try(:keys)
+  end
+
+  def store_locations(location, import_type)
+    Resource.where(title: location[:district], type: 'district', import_type: import_type).first_or_create if location[:district].present?
+    Resource.where(title: location[:department], type: 'department', import_type: import_type).first_or_create if location[:department].present?
+    Resource.where(title: location[:region_name], type: 'region', import_type: import_type).first_or_create if location[:region_name].present?
+    Resource.where(title: location[:name], type: 'location', import_type: import_type).first_or_create if location[:name].present?
   end
 
 end

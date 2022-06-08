@@ -15,6 +15,9 @@ COPY docker/database.yml /app/config/database.yml
 COPY . .
 
 RUN bundle install --without development test
+RUN yarn install
+RUN bundle exec rake DATABASE_URL=nulldb://user:pass@127.0.0.1/dbname assets:precompile
+
 
 ENTRYPOINT ["/app/docker/entrypoint.sh"]
 

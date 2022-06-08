@@ -22,28 +22,11 @@ set :job_template, "/bin/sh -l -c ':job'"
 set :environment, ENV["RAILS_ENV"]
 
 every 1.day, at: "00:05 am" do
-  runner "Importer.load_data(:poi)"
+  runner "Importer.delay.perform(:poi)"
 end
 
-every 1.day, at: "01:05 am" do
-  runner "Importer.parse_data(:poi)"
+every 1.day, at: "12:00 am" do
+  runner "Importer.delay.perform(:event)"
 end
-
-every 1.day, at: "02:05 am" do
-  runner "Importer.send_data(:poi)"
-end
-
-# Es werden bei BBNavi erst einmal keine Events benötigt
-# every 1.day, at: "00:30 am" do
-#   runner "Importer.load_data(:event)"
-# end
-
-# every 1.day, at: "01:30 am" do
-#   runner "Importer.parse_data(:event)"
-# end
-
-# every 1.day, at: "02:30 am" do
-#   runner "Importer.send_data(:event)"
-# end
 
 # Learn more: http://github.com/javan/whenever

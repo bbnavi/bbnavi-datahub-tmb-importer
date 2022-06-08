@@ -12,4 +12,8 @@ rm -f /myapp/tmp/pids/server.pid
 # npm set audit false
 bundle exec rake db:migrate
 
+# bundle exec rake assets:precompile
+cp -r /app/public/* /assets/
+
+
 exec "$@"

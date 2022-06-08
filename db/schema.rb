@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_03_28_144551) do
+ActiveRecord::Schema.define(version: 2022_06_08_122538) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -49,6 +49,8 @@ ActiveRecord::Schema.define(version: 2022_03_28_144551) do
     t.string "region_name"
     t.text "name"
     t.string "language"
+    t.string "category"
+    t.text "tags"
   end
 
   create_table "delayed_jobs", force: :cascade do |t|

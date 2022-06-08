@@ -32,7 +32,7 @@
       <tr>
         <td scope="row"><%= link_to community_record.id, community_record_path(community_record.id) %></td>
         <td><%= community_record.data_type %></td>
-        <td><%= community_record.title.humanize.titleize %></td>
+        <td><%= community_record.try(:title).try(:humanize).try(:titleize) %></td>
         <td><%= community_record.name %></td>
         <td><%= community_record.category %></td>
         <td><%= community_record.location_name %></td>

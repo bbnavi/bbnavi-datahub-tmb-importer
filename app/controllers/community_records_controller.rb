@@ -2,7 +2,7 @@ class CommunityRecordsController < ApplicationController
 
   # GET /community_records
   def index
-    @community_records = CommunityRecord.all
+    @community_records = CommunityRecord.all.select(:id, :data_type, :title, :created_at, :name, :category, :location_name, :department, :district, :region_name, :language)
     @communities = CommunityRecord.where.not(title: "unused").pluck(:title).uniq
   end
 

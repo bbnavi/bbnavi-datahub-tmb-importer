@@ -1,0 +1,81 @@
+<poi type="poi" id="102992" language="de" revision="1" name="Fahrradvermietung im City Residence Hotel Frankfurt-Oder " tstamp="1612276138">
+  <addresses type="array">
+    <address type="address">
+      <location type="varchar">Frankfurt (Oder)</location>
+      <zip type="varchar">15230</zip>
+      <street type="varchar">Bahnhofstr. 11</street>
+      <coordinates type="array">
+        <coordinate type="coordinate" cos="utm33">
+          <x type="varchar">3469081</x>
+          <y type="varchar">5798757</y>
+          <type type="coordinateType">utm33</type>
+        </coordinate>
+        <coordinate type="coordinate" cos="latlng">
+          <x type="varchar">52.338246766271</x>
+          <y type="varchar">14.54618806441</y>
+          <type type="coordinateType">latlng</type>
+        </coordinate>
+      </coordinates>
+    </address>
+  </addresses>
+  <connections type="array">
+    <connection type="connection">
+      <type type="connectionType">telefon</type>
+      <information type="text">0335-6642666</information>
+    </connection>
+    <connection type="connection">
+      <type type="connectionType">email</type>
+      <information type="text">info@city-residence-ffo.de</information>
+    </connection>
+    <connection type="connection">
+      <type type="connectionType">url</type>
+      <information type="text">http://www.city-residence-ffo.de/</information>
+    </connection>
+  </connections>
+  <categories type="array">
+    <classification type="classification_category_poi" id="5524" />
+  </categories>
+  <description type="rte">
+    <text type="text">
+      <div xmlns="http://www.w3.org/1999/xhtml" class="text">
+        Fahrradvermietung von Damen- und Herren-Tourenrädern sowie von Mountainbikes.
+        <br />
+        <br />
+        Eine Reservierung der Mieträder wird empfohlen.
+      </div>
+    </text>
+  </description>
+  <location type="location" id="2512" />
+  <thumbnail type="file" id="388862" />
+  <hasDatasheet type="bool">false</hasDatasheet>
+  <canonical type="varchar">https://www.reiseland-brandenburg.de/poi/seenland-oder-spree/fahrradvermietung-strich-service/fahrradvermietung-im-city-residence-hotel-frankfurt-oder/</canonical>
+  <price type="array">
+    <pricerangecomplex type="pricerangecomplex">
+      <category type="pricecategory">other</category>
+      <price type="text">8,50</price>
+      <categorytext type="text">Tourenrad pro Tag</categorytext>
+    </pricerangecomplex>
+    <pricerangecomplex type="pricerangecomplex">
+      <category type="pricecategory">other</category>
+      <price type="text">6,00</price>
+      <categorytext type="text">Mountainbike pro Tag</categorytext>
+    </pricerangecomplex>
+  </price>
+  <otheropeninghours type="varchar">Die Öffnungszeiten erfragen Sie bitte direkt im Hotel.</otheropeninghours>
+  <tags type="array">
+    <attribute type="attribute_tag" id="83041">
+      <value type="text">true</value>
+    </attribute>
+    <attribute type="attribute_tag" id="83042">
+      <value type="text">false</value>
+    </attribute>
+    <attribute type="attribute_tag" id="83043">
+      <value type="text">false</value>
+    </attribute>
+    <attribute type="attribute_tag" id="83044">
+      <value type="text">false</value>
+    </attribute>
+  </tags>
+  <hasOnlineOrder type="bool">false</hasOnlineOrder>
+  <hasVoucherOrder type="bool">false</hasVoucherOrder>
+</poi>

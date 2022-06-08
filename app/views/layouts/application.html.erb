@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>TMB Service</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">
+
+    <%= stylesheet_link_tag 'application', media: 'all', 'data-turbolinks-track': 'reload' %>
+    <%= javascript_pack_tag 'application', 'data-turbolinks-track': 'reload' %>
+  </head>
+
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <span class="navbar-brand mb-0 h1">TMB Importer</span>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" href="/resources">Location Resources</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/community_records">Community Records</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/background">Background Jobs</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" target="_blank" href="https://logs.tpwd.de/explore?orgId=1&left=%7B%22datasource%22:%22Loki%22,%22queries%22:%5B%7B%22refId%22:%22A%22,%22expr%22:%22%7Bswarm_service%3D%5C%22bb-bad-belzig-tmb-importer-sva-services_delayed_job%5C%22%7D%22%7D%5D,%22range%22:%7B%22from%22:%22now-3h%22,%22to%22:%22now%22%7D%7D">Logs</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <div class="container-fluid">
+      <%= yield %>
+    </div>
+  </body>
+</html>

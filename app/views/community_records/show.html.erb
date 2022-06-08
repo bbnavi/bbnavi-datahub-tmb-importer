@@ -1,0 +1,15 @@
+<% if notice.present? %>
+  <br>
+  <div class="alert alert-danger" role="alert">
+    <p id="notice"><%= notice %></p>
+  </div>
+<% end %>
+
+<h1><%= @community_record.name %></h1>
+
+<div class="alert alert-danger" role="alert">
+  <h4>Danger Zone - Send Data to <%= @community_record.title %> Server</h4>
+  <%= link_to "Send Data to #{@community_record.title} Server", send_single_data_community_record_path(@community_record), "data-confirm": "Sie wollen diese Daten zum #{@community_record.title} Server senden?" %>
+</div>
+
+<%= debug(@community_record.json_data) %>

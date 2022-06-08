@@ -24,13 +24,24 @@ class EventRecord < Record
 
     @xml_doc.xpath("/brandenburgevents/EVENT").each do |xml_event|
       location = parse_location(xml_event)
+      store_locations(location, "event")
 
-      matching_target_servers = select_target_servers(location, potential_target_servers)
-      next if matching_target_servers.blank?
+      matching_target_servers = select_target_servers(location, potential_target_servers, "event")
+      matching_target_servers = ["unused"] if matching_target_servers.blank?
 
       data_to_store = { events: [parse_single_event_from_xml(xml_event, location)] }
       matching_target_servers.each do |target_server|
-        CommunityRecord.create(title: target_server, data_type: "event", json_data: data_to_store)
+        CommunityRecord.create(
+          title: target_server,
+          name: xml_event.at_xpath("E_TITEL").try(:text),
+          data_type: "event",
+          json_data: data_to_store,
+          location_name: location[:name],
+          district: location[:district],
+          department: location[:department],
+          region_name: location[:region_name],
+          language: "de"
+        )
       end
     end
 
@@ -168,9 +179,10 @@ class EventRecord < Record
 
   def parse_location(event)
     {
+      name: event.at_xpath("E_LOC_NAME").try(:text),
       region_name: event.at_xpath("REGION_NAME_D").try(:text),
       department: event.at_xpath("TMBORTE_NAME").try(:text),
-      district: event.at_xpath("REGION_NAME_D").try(:text),
+      district: event.at_xpath("REGION_NAME_D").try(:text)
     }
   end
 

@@ -1,0 +1,76 @@
+<% if notice.present? %>
+  <br>
+  <div class="alert alert-danger" role="alert">
+    <p id="notice"><%= notice %></p>
+  </div>
+<% end %>
+
+<h1>
+  Community Records
+</h1>
+
+<br>
+
+<table class="table data_table" class="display">
+  <thead>
+    <tr>
+      <th scope="col">ID</th>
+      <th scope="col">DataType</th>
+      <th scope="col">Community</th>
+      <th scope="col">Name</th>
+      <th scope="col">Location Name</th>
+      <th scope="col">Department</th>
+      <th scope="col">District</th>
+      <th scope="col">Region</th>
+      <th scope="col">Language</th>
+      <th scope="col">CreatedAt</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @community_records.each do |community_record| %>
+      <tr>
+        <td scope="row"><%= link_to community_record.id, community_record_path(community_record.id) %></td>
+        <td><%= community_record.data_type %></td>
+        <td><%= community_record.title.humanize.titleize %></td>
+        <td><%= community_record.name %></td>
+        <td><%= community_record.location_name %></td>
+        <td><%= community_record.department %></td>
+        <td><%= community_record.district %></td>
+        <td><%= community_record.region_name %></td>
+        <td><%= community_record.language %></td>
+        <td><%= community_record.created_at.strftime("%d.%m.%Y %H:%M") %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<div class="alert alert-danger" role="alert">
+  <h4>Danger Zone</h4>
+  <h5>Load Data from TMB Server</h5>
+  <p>This will take a while (min. 2h)</p>
+
+  <ul>
+    <li><%= link_to("Load and parse events", import_community_records_path(import_type: "event")) %></li>
+    <li><%= link_to("Load and parse pois", import_community_records_path(import_type: "poi")) %></li>
+  </ul>
+
+  <br>
+
+  <h5>Send Data to Community Server</h5>
+  <div class="row">
+    <% ["poi", "event"].each do |import_type| %>
+      <div class="col">
+        <h5>Send all <%= import_type.humanize %> Data to:</h5>
+        <ul class="">
+          <% @communities.each do |community_name| %>
+            <li>
+              <%= link_to community_name.humanize.titleize, send_data_community_records_path(import_type: import_type, community_name: community_name), "data-confirm": "Sie wollen #{import_type}-Daten zum #{community_name} Server senden?" %>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+  </div>
+</div>

@@ -19,18 +19,37 @@ class PoiRecord < Record
     self.save
   end
 
+    # parse complete tmb xml and creates CommunityRecords
   def parse_data
     @xml_doc = Nokogiri.XML(xml_data)
     @xml_doc.remove_namespaces!
     @base_file_url = @xml_doc.at_xpath("/result/@fileUrl").try(:value)
     potential_target_servers = Rails.application.credentials.target_servers
+    p "Start parsing locations"
+    @xml_locations = parse_all_locations
+    p "Total locations: #{@xml_locations.keys.count}"
 
-    @xml_doc.xpath("/result/poi").each do |xml_poi|
+    p "Start parsing tags"
+    @xml_tags = parse_all_tags
+    p "Total tags: #{@xml_tags.keys.count}"
+
+    p "Start parsing categories"
+    @xml_categories = parse_all_categories
+    p "Total categories: #{@xml_categories.keys.count}"
+
+    xml_pois =  @xml_doc.xpath("/result/poi")
+    xml_poi_count = xml_pois.count
+
+    p "start parsing #{xml_poi_count} pois"
+    xml_pois.each_with_index do |xml_poi, index|
+      p "parsing poi #{index} of #{xml_poi_count}"
+      logger.warn "RAM USAGE: #{`ps -o rss= -p #{$$}`.to_i / 1024} MB"
+
       location = parse_location(xml_poi)
-      next unless record_valid?(xml_poi, location)
+      next unless record_valid?(xml_poi)
 
-      matching_target_servers = select_target_servers(location, potential_target_servers)
-      next if matching_target_servers.blank?
+      matching_target_servers = select_target_servers(location, potential_target_servers, "poi")
+      matching_target_servers = ["unused"] if matching_target_servers.blank?
 
       if xml_poi.xpath("tours/tour").present?
         data_to_store =  { tours: [parse_single_tour_from_xml(xml_poi, location)] }
@@ -39,11 +58,73 @@ class PoiRecord < Record
       end
 
       matching_target_servers.each do |target_server|
-        CommunityRecord.create(title: target_server, data_type: "poi", json_data: data_to_store)
+        CommunityRecord.create(
+          title: target_server,
+          name: xml_poi.attributes["name"].try(:value),
+          data_type: "poi",
+          json_data: data_to_store,
+          location_name: location[:name],
+          district: location[:district],
+          department: location[:department],
+          region_name: location[:region_name],
+          language: xml_poi.attributes["language"].try(:text)
+        )
       end
+
+      data_to_store = nil
     end
 
     true
+  end
+
+
+  # "118544"=>{:name=>"Kleinow", :department=>"Plattenburg", :district=>"Prignitz", :region_name=>"Prignitz", :lat=>"53.05111316367", :lng=>"11.957164938103"},
+  # "183394"=>{:name=>"Neu Canow", :department=>nil, :district=>nil, :region_name=>"Ruppiner Seenland", :lat=>"53.22200438016", :lng=>"12.935203626052"},
+  #
+  # @return [Hash] Location with districts and regions
+  def parse_all_locations
+    locations = {}
+    @xml_doc.xpath("/result/location").each do |xml_location|
+      location_id = xml_location.at_xpath("@id").try(:value)
+
+      locations[location_id] = {
+        name: xml_location.attributes["name"].try(:value),
+        department: department_name_for_location(xml_location),
+        district: district_name_for_location(xml_location),
+        region_name: region_name_for_location(xml_location),
+        state: state_for_location(xml_location)
+      }
+
+      coordinates = xml_location.xpath("coordinates/coordinate[@cos='latlng']").first
+      lat = coordinates.try(:at_xpath, "x").try(:text)
+      lng = coordinates.try(:at_xpath, "y").try(:text)
+      locations[location_id][:geo_location] = geo_location_input(lat, lng) if lat.present? && lng.present?
+      store_locations(locations[location_id], "poi")
+    end
+
+    locations
+  end
+
+  def parse_all_tags
+    tags = {}
+    @xml_doc.xpath("/result/attribute").each do |xml_tag|
+      tag_id = xml_tag.at_xpath("@id").try(:value)
+      tags[tag_id] = xml_tag.attributes["name"].try(:value)
+    end
+
+    tags
+  end
+
+  def parse_all_categories
+    categories = {}
+    @xml_doc.xpath("/result/classification").each do |xml_category|
+      category_id = xml_category.at_xpath("@id").try(:value)
+      next if xml_category.attributes["language"] && xml_category.attributes["language"].value != "de"
+
+      categories[category_id] = xml_category.attributes["name"].try(:value)
+    end
+
+    categories
   end
 
   def parse_single_poi_from_xml(poi, location)
@@ -98,7 +179,7 @@ class PoiRecord < Record
     # @param [Nokogiri::Node] xml_poi Ein Knoten im XML Dokument
     #
     # @return [Boolean] true wenn der Eintrag valide ist
-    def record_valid?(xml_poi, location)
+    def record_valid?(xml_poi)
       return false unless xml_poi.attributes["language"].text == "de"
 
       true
@@ -134,17 +215,7 @@ class PoiRecord < Record
     # @return [Array] List of names of tags of xml-data
     def parse_tags(xml_part)
       tag_ids = xml_part.xpath("tags/attribute/@id").map(&:value)
-      tag_ids.map { |c| find_tag_by_id(c) }
-    end
-
-    # Search XML for matching Tag
-    #
-    # @param [Integer] cat_id ID of Category in XML
-    #
-    # @return [String] Name of tag found in xml
-    def find_tag_by_id(tag_id)
-      tag = @xml_doc.xpath("/result/attribute[@id='#{tag_id}']").first
-      tag.attributes["name"].try(:value) if tag.present?
+      tag_ids.map { |id| @xml_tags[id.to_s] }
     end
 
     # Parsing poi data for category information
@@ -154,18 +225,7 @@ class PoiRecord < Record
     # @return [Array] List of names of categories of xml-data
     def parse_categories(xml_part)
       cat_ids = xml_part.xpath("categories/classification/@id").map(&:value)
-      cat_ids.map { |c| find_category_by_id(c) }
-    end
-
-    # Search XML for matching Category
-    #
-    # @param [Integer] cat_id ID of Category in XML
-    #
-    # @return [String] Name of category found in xml
-    def find_category_by_id(cat_id)
-      @xml_doc.xpath("/result/classification[@id='#{cat_id}']").first.attributes["name"].try(:value)
-    rescue
-      ""
+      cat_ids.map { |id| @xml_categories[id.to_s] }
     end
 
     def parse_addresses(xml_part)
@@ -313,25 +373,8 @@ class PoiRecord < Record
     # Parse Location Tag in xml-data
     #
     def parse_location(xml_part)
-      location_id = xml_part.at_xpath("location/@id")
-      location = @xml_doc.xpath("/result/location[@id='#{location_id}']").first
-
-      return {} if location.blank?
-
-      coordinates = location.xpath("coordinates/coordinate[@cos='latlng']").first
-      lat = coordinates.try(:at_xpath, "x").try(:text)
-      lng = coordinates.try(:at_xpath, "y").try(:text)
-
-      return_value = {
-        name: location.attributes["name"].try(:value),
-        department: department_name_for_location(location),
-        district: district_name_for_location(location),
-        region_name: region_name_for_location(location),
-        state: state_for_location(location)
-      }
-
-      return_value[:geo_location] = geo_location_input(lat, lng) if lat.present? && lng.present?
-      return_value
+      location_id = xml_part.at_xpath("location/@id").try(:value)
+      @xml_locations[location_id.to_s]
     end
 
     def department_name_for_location(location)

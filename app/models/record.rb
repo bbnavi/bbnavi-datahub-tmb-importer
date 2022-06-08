@@ -22,7 +22,7 @@ class Record < ApplicationRecord
     [1, true, '1', 'true', 't'].include?(value)
   end
 
-  def select_target_servers(location, potential_target_servers)
+  def select_target_servers(location, potential_target_servers, _import_type)
     # Bei BBNavi werden alle Standorte importiert
     selected_servers = potential_target_servers
 

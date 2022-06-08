@@ -4,17 +4,15 @@ services:
   delayed_job:
     image: registry.gitlab.tpwd.de/tpwd/bb-navi/datahub-tmb-importer
     command: bin/delayed_job -n 1 run
+    networks:
+      datahub-tmb-database-postgres:
     environment:
       RAILS_ENV: production
       RAILS_LOG_TO_STDOUT: 1
     configs:
-      - source: smart-village-app-converter-tmb-database-yml
-        target: /app/config/database.yml
-      - source: unicorn-5-worker
-        target: /app/config/unicorn.rb
-      - source: tmb-importer-master-key
+      - source: bbnavi-tmb-importer-master-key
         target: /app/config/master.key
-      - source: tmb-importer-production-key
+      - source: bbnavi-tmb-importer-production-key
         target: /app/config/credentials/production.key
     volumes:
       - unicorn:/unicorn
@@ -22,6 +20,10 @@ services:
       - settings:/app/config/settings
     depends_on: [db]
     deploy:
+      placement:
+        constraints:
+        - node.hostname == node-001.tpwd-bb-navi
+      replicas: 5
       restart_policy:
         condition: on-failure
 
@@ -44,6 +46,9 @@ services:
       - assets:/assets
       - settings:/app/config/settings
     deploy:
+      placement:
+        constraints:
+        - node.hostname == node-001.tpwd-bb-navi
       labels:
         traefik.enable: "true"
         traefik.port: 80
@@ -52,6 +57,7 @@ services:
         traefik.main.frontend.passHostHeader: "true"
         traefik.main.frontend.redirect.entryPoint: https
         traefik.api.frontend.rule: Host:tmb.datahub.bbnavi.de
+        traefik.api.frontend.auth.basic.users: tmb:$$2a$$12$$0zt1Yd4/EbAUngUIC1cHCO2LffHKLaq/Q.sXd/oPww/cHA52.cDy.
         traefik.api.frontend.passHostHeader: "true"
         traefik.api.frontend.redirect.entryPoint: https
       restart_policy:
@@ -70,6 +76,9 @@ services:
     volumes:
       - datahub_tmb_db:/var/lib/postgresql/data
     deploy:
+      placement:
+        constraints:
+        - node.hostname == node-001.tpwd-bb-navi
       restart_policy:
         condition: on-failure
 
@@ -81,6 +90,10 @@ services:
     entrypoint: sh
     command: bin/start-cron.sh
     depends_on: [db]
+    deploy:
+      placement:
+        constraints:
+        - node.hostname == node-001.tpwd-bb-navi
     configs:
       - source: bbnavi-tmb-importer-master-key
         target: /app/config/master.key

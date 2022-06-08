@@ -61,7 +61,7 @@ class PoiRecord < Record
         CommunityRecord.create(
           title: target_server,
           name: xml_poi.attributes["name"].try(:value),
-          category: data_to_store[:category_name],
+          category: data_to_store.fetch(:point_of_interests, [{}]).first[:category_name],
           data_type: "poi",
           json_data: data_to_store,
           location_name: location[:name],

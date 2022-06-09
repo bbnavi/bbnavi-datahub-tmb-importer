@@ -110,6 +110,8 @@ class PoiRecord < Record
     tags = {}
     @xml_doc.xpath("/result/attribute").each do |xml_tag|
       tag_id = xml_tag.at_xpath("@id").try(:value)
+      next if xml_tag.attributes["language"] && xml_tag.attributes["language"].value != "de"
+
       tags[tag_id] = xml_tag.attributes["name"].try(:value)
     end
 

@@ -215,9 +215,24 @@ class PoiRecord < Record
     #
     # @param [XML] XML part of an poi
     #
+    # <tags type="array">
+    #  <attribute type="attribute_tag" id="83041">
+    #    <value type="text">false</value>
+    #  </attribute>
+    #  <attribute type="attribute_tag" id="83042">
+    #    <value type="text">false</value>
+    #  </attribute>
+    #  <attribute type="attribute_tag" id="83043">
+    #    <value type="text">false</value>
+    #  </attribute>
+    #  <attribute type="attribute_tag" id="83044">
+    #    <value type="text">true</value>
+    #  </attribute>
+    # </tags>
+    #
     # @return [Array] List of names of tags of xml-data
     def parse_tags(xml_part)
-      tag_ids = xml_part.xpath("tags/attribute/@id").map(&:value)
+      tag_ids = xml_part.xpath("tags/attribute").select { |a| a.at_xpath("value").try(:text).to_s == "true" }.map{ |a|a.xpath("@id") }.flatten.map(&:value)
       tag_ids.map { |id| @xml_tags[id.to_s] }
     end
 

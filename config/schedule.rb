@@ -25,8 +25,8 @@ every 1.day, at: "00:05 am" do
   runner "Importer.delay.perform(:poi)"
 end
 
-every 1.day, at: "12:00 am" do
-  runner "Importer.delay.perform(:event)"
-end
+#every 1.day, at: "12:00 am" do
+#  runner "Importer.delay.perform(:event)"
+#end
 
 # Learn more: http://github.com/javan/whenever

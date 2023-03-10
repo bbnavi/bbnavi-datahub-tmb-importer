@@ -27,7 +27,7 @@ class CommunityRecordsController < ApplicationController
   def send_single_data
     community_record = CommunityRecord.find(params[:id])
     unless community_record.title == "unused"
-      options = ReleaseSettings.target_servers[community_record.title.to_sym]
+      options = Rails.application.credentials.target_servers[community_record.title.to_sym]
       Importer.delay.send_json_to_server(community_record.title, options, community_record.json_data)
     end
     redirect_to community_record_path(community_record), notice: "Sending data to #{community_record.title} server"

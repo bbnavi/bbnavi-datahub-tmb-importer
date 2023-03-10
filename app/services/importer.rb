@@ -41,11 +41,19 @@ class Importer
 
     def send_data_to_community(record_type, community_name)
       options = Rails.application.credentials.target_servers[community_name.to_sym]
-      CommunityRecord.where.not(title: "unused").where(data_type: record_type.to_s, title: community_name).each do |record|
+      access_token = Authentication.new(community_name, options).access_token
+      CommunityRecord.where.not(title: "unused").where(data_type: record_type.to_s, title: community_name).each_with_index do |record, index|
         begin
           data_to_send = record.json_data
-          send_json_to_server(community_name, options, data_to_send)
-          sleep 0.2
+          next if record.json_data["tours"].present?
+
+          if index % 1000 == 0
+            sleep 60
+            access_token = Authentication.new(name, options).access_token
+          end
+
+          send_json_to_server(community_name, options, data_to_send, access_token)
+
         rescue => e
           p "Error: #{e.message} - Server #{community_name} - ID #{record.id}"
         end
@@ -61,9 +69,8 @@ class Importer
       end
     end
 
-    def send_json_to_server(name, options, data_to_send)
+    def send_json_to_server(name, options, data_to_send, access_token)
       begin
-        access_token = Authentication.new(name, options).access_token
         url = options[:target_server][:url]
 
         puts "Sending data to #{name}"

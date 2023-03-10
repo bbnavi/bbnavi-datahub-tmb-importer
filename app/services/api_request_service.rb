@@ -62,6 +62,7 @@ class ApiRequestService
   def post_request
     url = Addressable::URI.parse(@uri.strip).normalize
     http = Net::HTTP.new(url.host, url.port || 80)
+    http.read_timeout = 60
 
     if @uri.include?("https://")
       http = Net::HTTP.new(url.hostname, url.port || 443)
@@ -72,6 +73,7 @@ class ApiRequestService
 
     @request = Net::HTTP::Post.new(
       url.path,
+      'User-Agent' => '[BBNavi] TMB Importer',
       "Content-Type" => headers.fetch(:content_type, "application/json")
     )
     @request.body = @params.to_json
